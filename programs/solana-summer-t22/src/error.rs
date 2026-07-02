@@ -6,4 +6,6 @@ pub enum ErrorCode {
     CustomError,
     #[msg("Only the admin can perform this action")]
     Unauthorized,
+    #[msg("Invalid state input, [0, 1, 2]")]
+    InvalidState,
 }

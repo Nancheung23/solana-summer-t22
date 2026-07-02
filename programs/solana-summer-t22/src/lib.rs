@@ -4,7 +4,6 @@ pub mod instructions;
 pub mod state;
 
 use anchor_lang::prelude::*;
-
 pub use constants::*;
 pub use instructions::*;
 pub use state::*;
@@ -45,5 +44,12 @@ pub mod solana_summer_t22 {
 
     pub fn forced_burn(ctx: Context<ForcedBurn>, amount: u64) -> Result<()> {
         forced_burn::handler(ctx, amount)
+    }
+
+    pub fn update_default_account_state(
+        ctx: Context<UpdateDefaultAccountState>,
+        state_code: u8,
+    ) -> Result<()> {
+        update_default_account_state::handler(ctx, state_code)
     }
 }

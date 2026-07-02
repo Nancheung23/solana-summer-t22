@@ -6,6 +6,7 @@ pub mod initialize;
 pub mod mint;
 pub mod propose_admin;
 pub mod transfer;
+pub mod update_default_account_state;
 
 pub use burn::*;
 pub use confirm_admin::*;
@@ -15,3 +16,4 @@ pub use initialize::*;
 pub use mint::*;
 pub use propose_admin::*;
 pub use transfer::*;
+pub use update_default_account_state::*;
