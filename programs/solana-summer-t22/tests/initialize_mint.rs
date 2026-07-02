@@ -28,6 +28,8 @@ fn initialize_mint_rejects_non_admin() {
             payer: intruder.pubkey(),
             config: config_pda(&program_id),
             authority: authority_pda(&program_id),
+            // add rent
+            rent: anchor_lang::prelude::rent::ID,
             mint: mint.pubkey(),
             token_program: TOKEN_2022_ID,
             system_program: system_program::ID,

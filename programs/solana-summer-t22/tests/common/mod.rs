@@ -143,6 +143,8 @@ pub fn init_mint(svm: &mut LiteSVM, admin: &Keypair, program_id: Pubkey) -> Keyp
             config: config_pda(&program_id),
             authority: authority_pda(&program_id),
             mint: mint.pubkey(),
+            // add rent
+            rent: anchor_lang::prelude::rent::ID,
             token_program: TOKEN_2022_ID,
             system_program: system_program::ID,
         }

@@ -1,8 +1,15 @@
 use crate::{error::ErrorCode, state::Config};
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::program::invoke;
+use anchor_lang::system_program::{create_account, CreateAccount};
+use anchor_spl::token_2022::spl_token_2022::instruction as token_2022_inst;
 use anchor_spl::{
-    token_2022::{spl_token_2022::state::AccountState, Token2022},
-    token_interface::{DefaultAccountStateInitialize, Mint},
+    token_2022::{
+        initialize_mint2,
+        spl_token_2022::{extension::ExtensionType, pod::PodMint, state::AccountState},
+        InitializeMint2,
+    },
+    token_interface::{default_account_state_initialize, DefaultAccountStateInitialize, Token2022},
 };
 
 #[derive(Accounts)]
@@ -27,43 +34,78 @@ pub struct InitializeMint<'info> {
     pub authority: UncheckedAccount<'info>,
 
     // create Mint
-    #[account(
-        init,
-        payer = payer,
-        mint::decimals = 6,
-        mint::authority = authority,
-        mint::freeze_authority = authority,
-        mint::token_program = token_program,
-        // activate delegate authority PDA
-        extensions::permanent_delegate::delegate = authority,
-        // meta data
-        extensions::metadata_pointer::authority = authority,
-        extensions::metadata_pointer::metadata_address = mint,
-    )]
-    pub mint: InterfaceAccount<'info, Mint>,
+    #[account(mut)]
+    pub mint: Signer<'info>,
+
+    pub rent: Sysvar<'info, Rent>,
 
     pub token_program: Program<'info, Token2022>,
     // rent
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(_ctx: Context<InitializeMint>) -> Result<()> {
-    let cpi_program = _ctx.accounts.token_program.to_account_info();
-    let mint = _ctx.accounts.mint.to_account_info();
-    let bumps_authority = _ctx.bumps.authority;
-    // match seeds of authority
-    let seeds: &[&[u8]] = &[b"authority", &[bumps_authority]];
-    // set default state
-    let default_state = AccountState::Initialized;
+pub fn handler(ctx: Context<InitializeMint>) -> Result<()> {
+    let payer = &ctx.accounts.payer;
+    let mint = &ctx.accounts.mint;
+    let authority = &ctx.accounts.authority;
+    let token_program = &ctx.accounts.token_program;
 
-    let cpi_accounts = DefaultAccountStateInitialize {
-        mint: mint,
-        token_program_id: cpi_program.clone(),
-    };
+    // current extensions
+    let extensions = [
+        ExtensionType::PermanentDelegate,
+        ExtensionType::DefaultAccountState,
+    ];
+    // calculate size
+    let mint_size = ExtensionType::try_calculate_account_len::<PodMint>(&extensions)?;
+    // convert to lamport
+    let lamports = (Rent::get()?).minimum_balance(mint_size);
 
-    let signer_seeds = &[&seeds[..]];
-    let cpi_ctx = CpiContext::new_with_signer(cpi_program.key(), cpi_accounts, signer_seeds);
-    // trigger initialization
-    anchor_spl::token_interface::default_account_state_initialize(cpi_ctx, &default_state)?;
+    // create mint account, pay rent
+    create_account(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info().key(),
+            CreateAccount {
+                from: payer.to_account_info(),
+                to: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        lamports,
+        mint_size as u64,
+        &ctx.accounts.token_program.key(),
+    )?;
+
+    // permanent delegate
+    invoke(
+        &token_2022_inst::initialize_permanent_delegate(
+            token_program.key,
+            mint.key,
+            authority.key,
+        )?,
+        &[mint.to_account_info()],
+    )?;
+
+    // initialize default_account_state
+    default_account_state_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info().key(),
+            DefaultAccountStateInitialize {
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        &AccountState::Initialized,
+    )?;
+
+    // mint setup
+    invoke(
+        &token_2022_inst::initialize_mint(
+            token_program.key,
+            mint.key,
+            authority.key,
+            Some(authority.key),
+            6,
+        )?,
+        &[mint.to_account_info(), ctx.accounts.rent.to_account_info()],
+    )?;
     Ok(())
 }

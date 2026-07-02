@@ -10,6 +10,8 @@ pub struct UpdateDefaultAccountState<'info> {
     #[account(mut, constraint = admin.key() == config.admin @ ErrorCode::Unauthorized)]
     pub admin: Signer<'info>,
 
+    /// CHECK: PDA used as the freeze authority for the mint.
+    /// This account is validated via the seeds and bump constraints below.
     #[account(
         seeds = [b"authority"],
         bump
