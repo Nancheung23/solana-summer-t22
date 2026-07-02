@@ -8,8 +8,10 @@ use crate::{error::ErrorCode, state::Config};
 
 #[derive(Accounts)]
 pub struct ForcedTransfer<'info> {
+    // admin
     pub admin: Signer<'info>,
 
+    // pda
     #[account(
         seeds = [b"config"],
         bump,
@@ -19,6 +21,7 @@ pub struct ForcedTransfer<'info> {
 
     pub mint: InterfaceAccount<'info, Mint>,
 
+    // ata a
     #[account(
         mut,
         token::mint = mint,
@@ -26,6 +29,7 @@ pub struct ForcedTransfer<'info> {
     )]
     pub from: InterfaceAccount<'info, TokenAccount>,
 
+    // ata b
     #[account(
         mut,
         token::mint = mint,
@@ -33,6 +37,7 @@ pub struct ForcedTransfer<'info> {
     )]
     pub to: InterfaceAccount<'info, TokenAccount>,
 
+    // delegate PDA
     /// CHECK: permanent delegate PDA; signs the transfer via the program.
     #[account(
         seeds = [b"authority"],
@@ -53,11 +58,8 @@ pub fn handler(ctx: Context<ForcedTransfer>, amount: u64) -> Result<()> {
         authority: ctx.accounts.authority.to_account_info(),
     };
 
-    let cpi_ctx = CpiContext::new_with_signer(
-        ctx.accounts.token_program.key(),
-        cpi_accounts,
-        signer_seeds,
-    );
+    let cpi_ctx =
+        CpiContext::new_with_signer(ctx.accounts.token_program.key(), cpi_accounts, signer_seeds);
 
     token_interface::transfer_checked(cpi_ctx, amount, ctx.accounts.mint.decimals)
 }

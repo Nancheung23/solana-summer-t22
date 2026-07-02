@@ -44,7 +44,11 @@ pub fn load_admin() -> Keypair {
         .trim_start_matches('[')
         .trim_end_matches(']')
         .split(',')
-        .map(|b| b.trim().parse::<u8>().expect("invalid byte in keypair file"))
+        .map(|b| {
+            b.trim()
+                .parse::<u8>()
+                .expect("invalid byte in keypair file")
+        })
         .collect();
     Keypair::try_from(&bytes[..]).expect("invalid admin keypair")
 }

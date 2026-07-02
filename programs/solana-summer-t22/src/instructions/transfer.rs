@@ -6,10 +6,13 @@ use anchor_spl::{
 
 #[derive(Accounts)]
 pub struct Transfer<'info> {
+    // signer
     pub owner: Signer<'info>,
 
+    // token
     pub mint: InterfaceAccount<'info, Mint>,
 
+    // signer ata
     #[account(
         mut,
         token::mint = mint,
@@ -18,6 +21,7 @@ pub struct Transfer<'info> {
     )]
     pub from: InterfaceAccount<'info, TokenAccount>,
 
+    // receiver ata
     #[account(
         mut,
         token::mint = mint,
@@ -25,6 +29,7 @@ pub struct Transfer<'info> {
     )]
     pub to: InterfaceAccount<'info, TokenAccount>,
 
+    // token program
     pub token_program: Program<'info, Token2022>,
 }
 

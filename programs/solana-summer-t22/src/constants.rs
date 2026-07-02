@@ -4,4 +4,4 @@ use anchor_lang::prelude::*;
 pub const SEED: &str = "anchor";
 
 /// Only this address is allowed to initialize a `Config`.
-pub const ADMIN: Pubkey = pubkey!("AHYic562KhgtAEkb1rSesqS87dFYRcfXb4WwWus3Zc9C");
+pub const ADMIN: Pubkey = pubkey!("HNZsqu8wnc1kmRBxeFAT91ka9KBtvZ7vkELN5jJELa8c");

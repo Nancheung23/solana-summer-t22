@@ -5,9 +5,11 @@ use crate::{error::ErrorCode, state::Config};
 
 #[derive(Accounts)]
 pub struct InitializeMint<'info> {
+    // admin
     #[account(mut)]
     pub payer: Signer<'info>,
 
+    // pda
     #[account(
         seeds = [b"config"],
         bump,
@@ -22,17 +24,20 @@ pub struct InitializeMint<'info> {
     )]
     pub authority: UncheckedAccount<'info>,
 
+    // create Mint
     #[account(
         init,
         payer = payer,
         mint::decimals = 6,
         mint::authority = authority,
         mint::token_program = token_program,
+        // activate delegate authority PDA
         extensions::permanent_delegate::delegate = authority,
     )]
     pub mint: InterfaceAccount<'info, Mint>,
 
     pub token_program: Program<'info, Token2022>,
+    // rent
     pub system_program: Program<'info, System>,
 }
 
