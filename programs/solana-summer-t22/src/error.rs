@@ -8,4 +8,6 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Invalid state input, [0, 1, 2]")]
     InvalidState,
+    #[msg("Supply has to be 0 before close mint")]
+    CloseMintError,
 }

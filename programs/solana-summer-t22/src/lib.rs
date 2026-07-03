@@ -52,4 +52,8 @@ pub mod solana_summer_t22 {
     ) -> Result<()> {
         update_default_account_state::handler(ctx, state_code)
     }
+
+    pub fn close_mint(ctx: Context<CloseMint>) -> Result<()> {
+        close_mint::handler(ctx)
+    }
 }

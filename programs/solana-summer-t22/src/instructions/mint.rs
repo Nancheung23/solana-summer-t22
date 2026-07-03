@@ -4,11 +4,7 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_lang::system_program::{create_account, CreateAccount};
 use anchor_spl::token_2022::spl_token_2022::instruction as token_2022_inst;
 use anchor_spl::{
-    token_2022::{
-        initialize_mint2,
-        spl_token_2022::{extension::ExtensionType, pod::PodMint, state::AccountState},
-        InitializeMint2,
-    },
+    token_2022::spl_token_2022::{extension::ExtensionType, pod::PodMint, state::AccountState},
     token_interface::{default_account_state_initialize, DefaultAccountStateInitialize, Token2022},
 };
 
@@ -54,6 +50,7 @@ pub fn handler(ctx: Context<InitializeMint>) -> Result<()> {
     let extensions = [
         ExtensionType::PermanentDelegate,
         ExtensionType::DefaultAccountState,
+        ExtensionType::MintCloseAuthority,
     ];
     // calculate size
     let mint_size = ExtensionType::try_calculate_account_len::<PodMint>(&extensions)?;
@@ -80,6 +77,16 @@ pub fn handler(ctx: Context<InitializeMint>) -> Result<()> {
             token_program.key,
             mint.key,
             authority.key,
+        )?,
+        &[mint.to_account_info()],
+    )?;
+
+    // mint close authority
+    invoke(
+        &token_2022_inst::initialize_mint_close_authority(
+            token_program.key,
+            mint.key,
+            Some(authority.key),
         )?,
         &[mint.to_account_info()],
     )?;
