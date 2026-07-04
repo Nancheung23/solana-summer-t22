@@ -18,8 +18,9 @@ pub mod solana_summer_t22 {
         initialize::handler(ctx)
     }
 
-    pub fn initialize_mint(ctx: Context<InitializeMint>) -> Result<()> {
-        mint::handler(ctx)
+    // add metadata pointer
+    pub fn initialize_mint(ctx: Context<InitializeMint>, args: TokenMetadataArgs) -> Result<()> {
+        mint::handler(ctx, args)
     }
 
     pub fn propose_admin(ctx: Context<ProposeAdmin>, new_admin: Pubkey) -> Result<()> {
@@ -51,6 +52,14 @@ pub mod solana_summer_t22 {
         state_code: u8,
     ) -> Result<()> {
         update_default_account_state::handler(ctx, state_code)
+    }
+
+    pub fn update_metadata(
+        ctx: Context<UpdateMetadata>,
+        field_code: String,
+        value: String,
+    ) -> Result<()> {
+        update_metadata::handler(ctx, field_code, value)
     }
 
     pub fn close_mint(ctx: Context<CloseMint>) -> Result<()> {

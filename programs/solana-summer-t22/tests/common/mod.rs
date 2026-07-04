@@ -20,6 +20,7 @@ pub use {
 use {
     solana_account::Account,
     solana_message::{Message, VersionedMessage},
+    solana_summer_t22::TokenMetadataArgs,
     solana_transaction::versioned::VersionedTransaction,
 };
 
@@ -137,7 +138,14 @@ pub fn init_mint(svm: &mut LiteSVM, admin: &Keypair, program_id: Pubkey) -> Keyp
     let mint = Keypair::new();
     let ix = Instruction::new_with_bytes(
         program_id,
-        &solana_summer_t22::instruction::InitializeMint {}.data(),
+        &solana_summer_t22::instruction::InitializeMint {
+            args: TokenMetadataArgs {
+                name: "Test Token".to_string(),
+                symbol: "TST".to_string(),
+                uri: "https://example.com/TST.json".to_string(),
+            },
+        }
+        .data(),
         solana_summer_t22::accounts::InitializeMint {
             payer: admin.pubkey(),
             config: config_pda(&program_id),

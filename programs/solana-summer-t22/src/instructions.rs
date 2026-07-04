@@ -8,6 +8,7 @@ pub mod mint;
 pub mod propose_admin;
 pub mod transfer;
 pub mod update_default_account_state;
+pub mod update_metadata;
 
 pub use burn::*;
 pub use close_mint::*;
@@ -19,3 +20,4 @@ pub use mint::*;
 pub use propose_admin::*;
 pub use transfer::*;
 pub use update_default_account_state::*;
+pub use update_metadata::*;

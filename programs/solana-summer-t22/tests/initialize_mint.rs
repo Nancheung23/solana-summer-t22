@@ -23,12 +23,18 @@ fn initialize_mint_rejects_non_admin() {
     let mint = Keypair::new();
     let ix = Instruction::new_with_bytes(
         program_id,
-        &solana_summer_t22::instruction::InitializeMint {}.data(),
+        &solana_summer_t22::instruction::InitializeMint {
+            args: solana_summer_t22::instructions::mint::TokenMetadataArgs {
+                name: "Test Token".to_string(),
+                symbol: "TEST".to_string(),
+                uri: "https://example.com/TST.json".to_string(),
+            },
+        }
+        .data(),
         solana_summer_t22::accounts::InitializeMint {
             payer: intruder.pubkey(),
             config: config_pda(&program_id),
             authority: authority_pda(&program_id),
-            // add rent
             rent: anchor_lang::prelude::rent::ID,
             mint: mint.pubkey(),
             token_program: TOKEN_2022_ID,
